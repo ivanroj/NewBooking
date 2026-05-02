@@ -664,10 +664,11 @@ window.addEventListener('load', () => {
     }
 
     // ── Tab data loader ────────────────────────────────────────────────────
-    function loadTabData(targetId) {
+    async function loadTabData(targetId) {
         if (targetId === 'roomsTab') loadRooms();
         if (targetId === 'schemaTab') {
-            loadRooms();
+            await loadRooms();
+            addWsBtn.disabled = !schemaRoomSelect.value;
             if (schemaRoomSelect.value) editor.loadWorkspaces(schemaRoomSelect.value);
             else editor.draw();
         }

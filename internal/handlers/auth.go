@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/example/coworking/internal/auth"
@@ -57,15 +58,21 @@ func (h *Handlers) StudentTelegramAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("[auth] bot_token length=%d prefix=%q", len(h.Auth.BotTokenForDebug()), h.Auth.BotTokenForDebug()[:min(10, len(h.Auth.BotTokenForDebug()))])
+	log.Printf("[auth] init_data length=%d", len(req.InitData))
+
 	tok, err := h.Auth.UpsertStudentFromTelegramInitData(req.InitData)
 	switch {
 	case err == nil:
 		_ = writeJSON(w, http.StatusOK, tokenResp{AccessToken: tok})
 	case errors.Is(err, auth.ErrTelegramNotConfigured):
+		log.Printf("[auth] telegram not configured")
 		_ = writeJSON(w, http.StatusServiceUnavailable, errResp{Error: "telegram_not_configured"})
 	case errors.Is(err, auth.ErrInvalidTelegramInitData):
+		log.Printf("[auth] invalid init_data: %v", err)
 		_ = writeJSON(w, http.StatusUnauthorized, errResp{Error: "invalid_telegram_init_data"})
 	default:
+		log.Printf("[auth] unexpected error: %v", err)
 		_ = writeJSON(w, http.StatusUnauthorized, errResp{Error: "unauthorized"})
 	}
 }
