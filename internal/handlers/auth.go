@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/example/coworking/internal/auth"
@@ -62,10 +63,13 @@ func (h *Handlers) StudentTelegramAuth(w http.ResponseWriter, r *http.Request) {
 	case err == nil:
 		_ = writeJSON(w, http.StatusOK, tokenResp{AccessToken: tok})
 	case errors.Is(err, auth.ErrTelegramNotConfigured):
+		log.Printf("[auth] telegram not configured")
 		_ = writeJSON(w, http.StatusServiceUnavailable, errResp{Error: "telegram_not_configured"})
 	case errors.Is(err, auth.ErrInvalidTelegramInitData):
+		log.Printf("[auth] invalid init_data: %v", err)
 		_ = writeJSON(w, http.StatusUnauthorized, errResp{Error: "invalid_telegram_init_data"})
 	default:
+		log.Printf("[auth] unexpected error: %v", err)
 		_ = writeJSON(w, http.StatusUnauthorized, errResp{Error: "unauthorized"})
 	}
 }
