@@ -1,0 +1,29 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go artifacts
+/bin/
+/pkg/
+/*.test
+
+# IDE/editor
+.vscode/
+.idea/
+*.iml
+
+# Node modules
+node_modules/
+
+# Build artifacts
+/dist/
+/build/
+
+# Docker
+*.tar
+
+# OS files
+Thumbs.db
+.DS_Store
