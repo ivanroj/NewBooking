@@ -1,0 +1,177 @@
+/* admin.css - Admin Panel specific styles */
+.layout-dashboard {
+    display: flex;
+    height: 100vh;
+    padding: 0 !important;
+}
+
+.sidebar {
+    width: 280px;
+    height: 100%;
+    border-radius: 0;
+    border-top: none;
+    border-bottom: none;
+    border-left: none;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+}
+
+.sidebar h2 {
+    margin-bottom: 2rem;
+    color: var(--button-color);
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-grow: 1;
+}
+
+.admin-nav .nav-btn {
+    text-align: left;
+    padding: 1rem;
+    font-size: 1.05rem;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+.content-area {
+    flex-grow: 1;
+    border-radius: 0;
+    border: none;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+    background: rgba(15, 23, 42, 0.4);
+}
+
+/* Forms & Tables */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.95rem;
+    color: var(--hint-color);
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
+    color: var(--text-color);
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-family: inherit;
+}
+
+.form-select {
+    appearance: none;
+}
+
+.form-select option {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.header-with-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.admin-table th, .admin-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-table th {
+    background: rgba(0,0,0,0.3);
+    color: var(--hint-color);
+    font-weight: 500;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.error-msg {
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    min-height: 1.2rem;
+}
+
+/* Schema Grid */
+.schema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    min-height: 300px;
+}
+
+.schema-ws-card {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid var(--button-color);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.schema-ws-card:hover {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+/* Stats */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-card h3 {
+    font-size: 1rem;
+    color: var(--hint-color);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--button-color);
+}
+
+.login-card {
+    max-width: 400px;
+    margin: 10vh auto;
+}
