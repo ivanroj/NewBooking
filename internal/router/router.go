@@ -56,9 +56,13 @@ func NewRouter(h *handlers.Handlers) *Router {
 	admin.HandleFunc("/rooms/{room_id}/workspaces/{ws_id}", h.AdminDeleteWorkspace).Methods(http.MethodDelete)
 
 	// Admin bookings & settings
+	admin.HandleFunc("/admin/bookings", h.AdminListBookings).Methods(http.MethodGet)
 	admin.HandleFunc("/admin/bookings/{id}", h.AdminUpdateBooking).Methods(http.MethodPatch)
 	admin.HandleFunc("/admin/settings/booking-limit", h.AdminGetBookingLimit).Methods(http.MethodGet)
 	admin.HandleFunc("/admin/settings/booking-limit", h.AdminSetBookingLimit).Methods(http.MethodPatch)
+
+	// Admin stats
+	admin.HandleFunc("/admin/stats", h.AdminGetStats).Methods(http.MethodGet)
 
 	return &Router{mux: main}
 }
@@ -66,4 +70,3 @@ func NewRouter(h *handlers.Handlers) *Router {
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.mux.ServeHTTP(w, req)
 }
-

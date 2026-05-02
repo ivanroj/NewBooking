@@ -3,5 +3,6 @@ export default {
   transform: {},
   moduleNameMapper: {
     "\\.(css|less)$": "<rootDir>/tests/__mocks__/styleMock.js"
-  }
+  },
+  injectGlobals: true
 };
