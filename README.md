@@ -24,11 +24,25 @@ Defaults expect Postgres on **`127.0.0.1:5432`**, DB `coworking_db`, user/passwo
 
 ```bash
 export DB_DSN='postgres://postgres:postgres@127.0.0.1:5432/coworking_db?sslmode=disable'
+export JWT_SECRET='dev-jwt-secret-change-me-please-32b!!'   # min 24 chars; override in prod
+export TELEGRAM_BOT_TOKEN=''                               # Bot token для проверки init_data студентов (см. @BotFather)
 export PORT=8080
 go run ./cmd/migrate -command up -dir migrations
 go run ./cmd/server
 curl -sf http://127.0.0.1:8080/health
 ```
+
+### Auth API (Этап 2)
+
+JWT (HS256). Роли выдаются в JWT: `student`, `admin`.
+
+| Method | Path | Защита | Описание |
+|--------|------|--------|----------|
+| `POST` | `/api/auth/admin/login` | — | `{ "email", "password" }` → `{ "access_token" }`. Seed админ после миграций: `admin@cowork.local` / `AdminDevPass#1`. **Замените пароль и хеш в БД перед продом.** Генерация bcrypt: `go run ./tools/genbcrypt 'NewStrongPassword'` и правка SQL/seed. |
+| `POST` | `/api/auth/student/telegram` | — | `{ "init_data": "<raw строка Telegram.WebApp.initData>" }`. Проверка подписи по `TELEGRAM_BOT_TOKEN`; при отсутствии токена — **503**. Регистрация и вход объединены: пользователь создаётся или поднимается по `telegram_id`. |
+| `GET` | `/api/rooms` | `Authorization: Bearer <JWT>` | Список помещений для студента и админа. |
+
+Срок жизни токена задаётся `JWT_EXPIRES_HOURS` (по умолчанию 168).
 
 ### Migrating manually
 
@@ -70,6 +84,6 @@ npm run format
 |------|---------|
 | `cmd/server` | HTTP API entrypoint |
 | `cmd/migrate` | Apply migrations using `DB_DSN` |
-| `internal/` | Config, DB, router, repositories, models |
+| `internal/` | config, DB, роутинг, middleware, handlers, репозитории, доменная логика (в т.ч. `internal/auth`), интеграционные тесты |
 | `migrations/` | `golang-migrate` SQL files |
 | `frontend/` | TMA статика |

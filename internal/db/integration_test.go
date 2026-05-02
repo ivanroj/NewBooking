@@ -4,56 +4,23 @@ package db
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
 	dbmigrations "github.com/example/coworking/internal/dbmigrations"
+	"github.com/example/coworking/internal/testsupport"
 )
 
-func migrationDir(tb testing.TB) string {
-	tb.Helper()
-	dir, err := os.Getwd()
-	if err != nil {
-		tb.Fatal(err)
-	}
-	for {
-		marker := filepath.Join(dir, "migrations", "001_initial.up.sql")
-		if fi, ferr := os.Stat(marker); ferr == nil && !fi.IsDir() {
-			return filepath.Join(dir, "migrations")
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			tb.Fatal("migration files not found (expected migrations/001_initial.up.sql reachable from cwd)")
-		}
-		dir = parent
-	}
-}
-
-func integrationDSN(tb testing.TB) string {
-	tb.Helper()
-	dsn := os.Getenv("INTEGRATION_DB_DSN")
-	if dsn == "" {
-		dsn = os.Getenv("DB_DSN")
-	}
-	if dsn == "" {
-		dsn = "postgres://postgres:postgres@127.0.0.1:5432/coworking_db?sslmode=disable"
-	}
-	return dsn
-}
-
 func TestIntegration_MigrationsAndSchema(t *testing.T) {
-	if os.Getenv("CI") != "true" && os.Getenv("RUN_INTEGRATION") != "1" {
-		t.Skip(`set RUN_INTEGRATION=1 with PostgreSQL or run in CI (CI=true)`)
-	}
+	testsupport.RunIfEnabled(t)
 
-	dsn := integrationDSN(t)
-	migDir := migrationDir(t)
-	if err := dbmigrations.DownAll(dsn, migDir); err != nil {
+	dsn := testsupport.DSN(t)
+	dir := testsupport.MigrationDir(t)
+
+	if err := dbmigrations.DownAll(dsn, dir); err != nil {
 		t.Fatalf("down-all: %v", err)
 	}
-	if err := dbmigrations.Up(dsn, migDir); err != nil {
+	if err := dbmigrations.Up(dsn, dir); err != nil {
 		t.Fatalf("up: %v", err)
 	}
 

@@ -36,5 +36,7 @@ services:
     environment:
       DB_DSN: postgres://postgres:postgres@db:5432/coworking_db?sslmode=disable
       PORT: "8080"
+      JWT_SECRET: "dev-jwt-secret-change-me-please-32b!!"
+      TELEGRAM_BOT_TOKEN: ""
     ports:
       - "8080:8080"

@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       INTEGRATION_DB_DSN: postgres://postgres:postgres@localhost:5432/coworking_db?sslmode=disable
+      JWT_SECRET: test-jwt-secret-change-me-min-24-ch!!!!
+      TELEGRAM_BOT_TOKEN: ci-placeholder-not-used-but-valid-length-xxxx
     services:
       postgres:
         image: postgres:15-alpine

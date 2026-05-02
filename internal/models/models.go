@@ -13,10 +13,11 @@ type Workspace struct {
 }
 
 type User struct {
-	ID         int64  `db:"id" json:"id"`
-	TelegramID string `db:"telegram_id" json:"telegram_id"`
-	Role       string `db:"role" json:"role"`
-	Email      string `db:"email" json:"email"`
+	ID           int64  `db:"id" json:"id"`
+	TelegramID   string `db:"telegram_id" json:"telegram_id,omitempty"`
+	Role         string `db:"role" json:"role"`
+	Email        string `db:"email" json:"email,omitempty"`
+	PasswordHash string `db:"password_hash" json:"-"`
 }
 
 type Booking struct {

@@ -4,20 +4,29 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/example/coworking/internal/auth"
 	"github.com/example/coworking/internal/db"
+	"github.com/example/coworking/internal/handlers"
 	"github.com/example/coworking/internal/repository"
 )
 
 func TestHealth_OK(t *testing.T) {
 	t.Parallel()
 
-	var nilDB *db.DB
-	repo := repository.NewRepo(nilDB)
+	var nilConn *db.DB
+	authSvc := auth.NewService(
+		repository.NewRepo(nilConn),
+		[]byte("dev-jwt-secret-change-me-please-32"),
+		time.Hour,
+		"",
+	)
+	h := handlers.New(authSvc, nil)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 
-	NewRouter(repo).ServeHTTP(rec, req)
+	NewRouter(h).ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status: want %d, got %d", http.StatusOK, rec.Code)

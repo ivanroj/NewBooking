@@ -23,6 +23,13 @@
 | 1️⃣7️⃣ | Тесты: unit `/health`, интеграция БД под `-tags=integration` (+ `RUN_INTEGRATION` / `CI`) | `internal/router/router_test.go`, `internal/db/integration_test.go` |
 | 1️⃣8️⃣ | Frontend: TMA заготовка + ESLint 9 + Prettier | `frontend/` |
 | 1️⃣9️⃣ | `README.md` дополнен командами; `.golangci.yml` без `depguard`; исключения revive/stylecheck по package‑комментариям | `README.md`, `.golangci.yml` |
+| 2️⃣1️⃣ | Миграция `002_auth_seed`: колонка `password_hash`, seed‑администратор | `migrations/002_*` |
+| 2️⃣2️⃣ | Валидация Telegram Web Apps `init_data` (HMAC), unit‑тест | `internal/auth/telegram.go`, `telegram_test.go`, `SignedInitDataForTests` (`//go:build integration`) |
+| 2️⃣3️⃣ | JWT (`golang-jwt/jwt/v5`), сервис входа студента и админа | `internal/auth/*.go`, `JWT_SECRET`, `JWT_EXPIRES_HOURS`, `TELEGRAM_BOT_TOKEN` в `internal/config/` |
+| 2️⃣4️⃣ | HTTP: `/api/auth/admin/login`, `/api/auth/student/telegram`, middleware Bearer, `/api/rooms` | `internal/handlers/*`, `internal/middleware/jwt.go`, `internal/router/router.go` |
+| 2️⃣5️⃣ | Репозиторий: `GetAdminByEmail`, `UpsertStudentTelegramUser` | `internal/repository/users.go` |
+| 2️⃣6️⃣ | Интеграционный сценарий API без циклических импортов | `internal/integration/api_auth_test.go`, `internal/testsupport/integration.go` |
+| 2️⃣7️⃣ | Документация и compose: секрет JWT, переменная бота; CI env | `README.md`, `docker-compose.yml`, `.github/workflows/ci.yml` |
 
 ## Этап 1 — статус (2026-05-02)
 
@@ -30,7 +37,13 @@
 
 План из согласованного сообщения выполнен: база смоделирована миграциями, воспроизводимость — через `cmd/migrate` и сервис `migrate` в compose, CI включает линтеры и интеграционные тесты (Postgres‑сервис), фронт — продовый скелет без «отладочных» текстов Telegram (сообщение о выборе комнаты только на чистый браузер вне клиента Telegram).
 
-Локально интеграционные тесты **skipped**, пока не заданы `RUN_INTEGRATION=1` или общий признак CI — это осознанно, чтобы `./...` без Docker не падал.
+Локально интеграционные тесты **skipped**, пока не заданы `RUN_INTEGRATION=1` или общий признак CI — это осознанно, чтобы `./...` без Docker не падал. Пакеты с покрытием: `internal/db`, `internal/integration` (API `httptest`), общий помощник — `internal/testsupport`.
+
+## Этап 2 — статус (авторизация и роли, backend)
+
+Закрывает формулировку Этапа 2 из `description.md`: студент проходит связку **регистрация+вход** через подписанный `init_data` Mini App (без пароля студента на сервере), администратор — по email/паролю из учётной записи, созданной миграцией; выдаётся JWT; защищённый эндпоинт списка помещений; интеграционные тесты на успешный логин и отказ при неверных данных; линтеры зелёные.
+
+Дальнейший шаг по плану — **Этап 3**: CRUD помещений/мест, ядро бронирований, лимиты.
 
 ## Архив: команды‑черновик (до реализации, можно не копировать)
 ```bash
