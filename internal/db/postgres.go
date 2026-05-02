@@ -1,21 +1,18 @@
 package db
 
 import (
-    "github.com/jmoiron/sqlx"
-    _ "github.com/lib/pq"
-    "log"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 type DB struct {
-    *sqlx.DB
+	*sqlx.DB
 }
 
 func NewDB(dsn string) (*DB, error) {
-    db, err := sqlx.Connect("postgres", dsn)
-    if err != nil {
-        return nil, err
-    }
-    // Optionally run migrations here (placeholder)
-    log.Println("Connected to Postgres")
-    return &DB{DB: db}, nil
+	dbx, err := sqlx.Connect("postgres", dsn)
+	if err != nil {
+		return nil, err
+	}
+	return &DB{DB: dbx}, nil
 }

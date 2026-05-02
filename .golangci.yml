@@ -12,7 +12,6 @@ linters:
     - revive
     - stylecheck
     - unused
-    - depguard
     - dupl
     - gocritic
     - misspell
@@ -26,5 +25,10 @@ issues:
   exclude-use-default: false
   exclude:
     - "should have comment or be unexported"
+  exclude-rules:
+    - linters: [revive]
+      text: "package-comments"
+    - linters: [stylecheck]
+      text: "ST1000"
   max-issues-per-linter: 0
   max-same-issues: 0

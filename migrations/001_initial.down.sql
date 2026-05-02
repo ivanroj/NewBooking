@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS booking_settings;
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS workspaces;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS rooms;
