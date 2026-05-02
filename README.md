@@ -7,7 +7,41 @@ Telegram Mini App for managing university coworking spaces.
 - **Database:** PostgreSQL 15+
 - **CI:** GitHub Actions — unit tests, `golangci-lint`, integration tests (`-tags=integration`), frontend ESLint
 
-## Local development
+## Быстрый запуск (Docker Compose)
+
+Для развёртывания на локальном ПК нужен только [Docker](https://docs.docker.com/get-docker/) и Docker Compose.
+
+```bash
+git clone https://github.com/ivanroj/NewBooking.git
+cd NewBooking
+docker compose up --build
+```
+
+После запуска:
+- **Фронтенд (UI):** [http://localhost:3000](http://localhost:3000)
+- **API (backend):** [http://localhost:8080](http://localhost:8080)
+- **Health check:** [http://localhost:8080/health](http://localhost:8080/health)
+
+Compose автоматически:
+1. Поднимает PostgreSQL 15
+2. Применяет все миграции
+3. Запускает Go API на порту 8080
+4. Запускает Nginx с фронтендом на порту 3000 (проксирует `/api/` → backend)
+
+### Вход в админ-панель
+
+Откройте [http://localhost:3000/admin.html](http://localhost:3000/admin.html) и войдите:
+- **Email:** `admin@cowork.local`
+- **Пароль:** `AdminDevPass#1`
+
+### Остановка и очистка
+
+```bash
+docker compose down          # остановить контейнеры
+docker compose down -v       # остановить и удалить данные БД
+```
+
+## Local development (без Docker)
 
 ### PostgreSQL via Docker Compose
 
@@ -30,6 +64,16 @@ export PORT=8080
 go run ./cmd/migrate -command up -dir migrations
 go run ./cmd/server
 curl -sf http://127.0.0.1:8080/health
+```
+
+### Frontend (dev-сервер)
+
+Можно открыть `frontend/index.html` напрямую или использовать любой HTTP-сервер:
+
+```bash
+cd frontend
+npx serve .
+# или: python3 -m http.server 3000
 ```
 
 ### Auth API (Этап 2)
@@ -86,4 +130,4 @@ npm run format
 | `cmd/migrate` | Apply migrations using `DB_DSN` |
 | `internal/` | config, DB, роутинг, middleware, handlers, репозитории, доменная логика (в т.ч. `internal/auth`), интеграционные тесты |
 | `migrations/` | `golang-migrate` SQL files |
-| `frontend/` | TMA статика |
+| `frontend/` | TMA статика (HTML/JS/CSS), Nginx config, Dockerfile |

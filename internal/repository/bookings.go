@@ -156,8 +156,84 @@ LIMIT $%d OFFSET $%d`, statusFilter, len(args)-1, len(args))
 	return BookingListResult{Items: items, Total: total}, nil
 }
 
+// AdminBookingView is a booking with joined workspace and room names.
+type AdminBookingView struct {
+	ID            int64  `db:"id" json:"id"`
+	UserID        int64  `db:"user_id" json:"user_id"`
+	WorkspaceID   int64  `db:"workspace_id" json:"workspace_id"`
+	WorkspaceName string `db:"workspace_name" json:"workspace_name"`
+	RoomName      string `db:"room_name" json:"room_name"`
+	StartTime     string `db:"start_time" json:"start_time"`
+	EndTime       string `db:"end_time" json:"end_time"`
+	Status        string `db:"status" json:"status"`
+}
+
+// AdminBookingListResult is a paginated list of admin booking views.
+type AdminBookingListResult struct {
+	Items []AdminBookingView `json:"items"`
+	Total int                `json:"total"`
+}
+
+// AdminListBookings returns all bookings with joined workspace/room names for admin.
+func (r *Repo) AdminListBookings(page, limit int, status string, roomID int64) (AdminBookingListResult, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * limit
+
+	where := "WHERE 1=1"
+	args := []any{}
+	argN := 0
+
+	if status != "" {
+		argN++
+		where += fmt.Sprintf(" AND b.status = $%d", argN)
+		args = append(args, status)
+	}
+	if roomID > 0 {
+		argN++
+		where += fmt.Sprintf(" AND w.room_id = $%d", argN)
+		args = append(args, roomID)
+	}
+
+	countQ := fmt.Sprintf(`SELECT COUNT(*) FROM bookings b
+		JOIN workspaces w ON w.id = b.workspace_id %s`, where)
+	var total int
+	if err := r.db.Get(&total, countQ, args...); err != nil {
+		return AdminBookingListResult{}, fmt.Errorf("count admin bookings: %w", err)
+	}
+
+	argN++
+	limitIdx := argN
+	argN++
+	offsetIdx := argN
+	args = append(args, limit, offset)
+
+	listQ := fmt.Sprintf(`
+SELECT b.id, b.user_id, b.workspace_id, w.name AS workspace_name,
+       r.name AS room_name, b.start_time, b.end_time, b.status
+FROM bookings b
+JOIN workspaces w ON w.id = b.workspace_id
+JOIN rooms r ON r.id = w.room_id
+%s
+ORDER BY b.start_time DESC
+LIMIT $%d OFFSET $%d`, where, limitIdx, offsetIdx)
+
+	var items []AdminBookingView
+	if err := r.db.Select(&items, listQ, args...); err != nil {
+		return AdminBookingListResult{}, fmt.Errorf("list admin bookings: %w", err)
+	}
+	if items == nil {
+		items = []AdminBookingView{}
+	}
+	return AdminBookingListResult{Items: items, Total: total}, nil
+}
+
 // getGlobalLimitTx reads booking_limit from global_settings inside an existing transaction.
-func getGlobalLimitTx(tx *sqlx.Tx) (int, error) {
+func getGlobalLimitTx(tx *sqlx.Tx) (int, error) { //nolint:unparam // error kept for future use
 	var raw string
 	const q = `SELECT value FROM global_settings WHERE key = 'booking_limit'`
 	if err := tx.Get(&raw, q); err != nil {

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора - Коворкинг</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <script type="module" src="admin.js" defer></script>
+</head>
+<body>
+    <div class="background-aurora">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Login View -->
+    <main id="loginView" class="view active">
+        <div class="glass-card login-card">
+            <h2 class="text-center">Админ-панель</h2>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="admin@example.com">
+                </div>
+                <div class="form-group mt-10">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <div class="error-msg" id="loginError"></div>
+                <button type="submit" class="btn primary full-width mt-20">Войти</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Dashboard View -->
+    <div id="dashboardView" class="view hidden layout-dashboard">
+        <aside class="sidebar glass-card">
+            <h2>Коворкинг</h2>
+            <nav class="admin-nav">
+                <button class="nav-btn active" data-target="roomsTab">Помещения</button>
+                <button class="nav-btn" data-target="schemaTab">Схемы (Места)</button>
+                <button class="nav-btn" data-target="bookingsTab">Бронирования</button>
+                <button class="nav-btn" data-target="statsTab">Статистика</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn secondary full-width" id="logoutBtn">Выйти</button>
+            </div>
+        </aside>
+
+        <section class="content-area glass-card">
+            <!-- Rooms Tab -->
+            <div id="roomsTab" class="tab-content active">
+                <div class="header-with-actions">
+                    <h2>Управление помещениями</h2>
+                    <button class="btn primary" id="openCreateRoomBtn">Добавить помещение</button>
+                </div>
+                <div class="table-responsive mt-20">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Описание</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Schema Tab (Canvas Editor) -->
+            <div id="schemaTab" class="tab-content hidden">
+                <h2>Редактор схем</h2>
+                <div class="form-group mt-10">
+                    <label for="schemaRoomSelect">Выберите помещение:</label>
+                    <select id="schemaRoomSelect" class="form-select"></select>
+                </div>
+                <div class="schema-editor mt-20">
+                    <div class="schema-toolbar">
+                        <button class="btn primary" id="addWorkspaceCanvasBtn" disabled>Добавить место (клик на план)</button>
+                        <span id="canvasHint" class="hint-text hidden">Кликните на свободное место на плане</span>
+                    </div>
+                    <div class="canvas-wrapper mt-10">
+                        <canvas id="schemaCanvas" width="800" height="500"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Tab -->
+            <div id="bookingsTab" class="tab-content hidden">
+                <h2>Все бронирования</h2>
+                <div class="bookings-filters mt-10">
+                    <div class="form-group">
+                        <label for="bookingsStatusFilter">Статус:</label>
+                        <select id="bookingsStatusFilter" class="form-select">
+                            <option value="">Все</option>
+                            <option value="active">Активные</option>
+                            <option value="canceled">Отменённые</option>
+                            <option value="completed">Завершённые</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive mt-20">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Место</th>
+                                <th>Помещение</th>
+                                <th>Пользователь</th>
+                                <th>Время</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="pagination mt-20" id="bookingsPagination"></div>
+            </div>
+
+            <!-- Stats Tab -->
+            <div id="statsTab" class="tab-content hidden">
+                <h2>Статистика и Отчеты</h2>
+                <div class="stats-date-range mt-10">
+                    <div class="form-group">
+                        <label for="statsFrom">С:</label>
+                        <input type="date" id="statsFrom">
+                    </div>
+                    <div class="form-group">
+                        <label for="statsTo">По:</label>
+                        <input type="date" id="statsTo">
+                    </div>
+                    <button class="btn primary" id="applyStatsFilter">Применить</button>
+                </div>
+
+                <div class="stats-grid mt-20">
+                    <div class="stat-card glass-card">
+                        <h3>Всего бронирований</h3>
+                        <p id="statTotalBookings" class="stat-value">0</p>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <h3>Активных бронирований</h3>
+                        <p id="statActiveBookings" class="stat-value">0</p>
+                    </div>
+                </div>
+
+                <div class="stats-charts mt-20">
+                    <div class="chart-section glass-card">
+                        <h3>Загрузка по помещениям</h3>
+                        <div id="roomLoadChart" class="bar-chart mt-10"></div>
+                    </div>
+                    <div class="chart-section glass-card">
+                        <h3>Топ-5 популярных мест</h3>
+                        <div id="topWorkspacesChart" class="bar-chart mt-10"></div>
+                    </div>
+                    <div class="chart-section glass-card">
+                        <h3>Распределение по дням недели</h3>
+                        <div id="dayDistChart" class="bar-chart mt-10"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modals -->
+    <div id="roomModal" class="modal-overlay hidden">
+        <div class="glass-card modal-content">
+            <h2 id="roomModalTitle">Добавить помещение</h2>
+            <form id="roomForm">
+                <input type="hidden" id="roomId">
+                <div class="form-group mt-10">
+                    <label>Название</label>
+                    <input type="text" id="roomName" required>
+                </div>
+                <div class="form-group mt-10">
+                    <label>Описание</label>
+                    <textarea id="roomDesc" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary modal-cancel" data-modal="roomModal">Отмена</button>
+                    <button type="submit" class="btn primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="workspaceModal" class="modal-overlay hidden">
+        <div class="glass-card modal-content">
+            <h2 id="workspaceModalTitle">Добавить место</h2>
+            <form id="workspaceForm">
+                <input type="hidden" id="workspaceId">
+                <input type="hidden" id="workspaceGridX">
+                <input type="hidden" id="workspaceGridY">
+                <div class="form-group mt-10">
+                    <label>Название / Номер места</label>
+                    <input type="text" id="workspaceName" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary modal-cancel" data-modal="workspaceModal">Отмена</button>
+                    <button type="submit" class="btn primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
