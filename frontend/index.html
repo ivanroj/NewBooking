@@ -1,18 +1,83 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-    <title>Коворкинг</title>
-    <link rel="stylesheet" href="styles.css" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Бронирование Коворкинга</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="app.js" defer></script>
-  </head>
-  <body>
-    <main class="shell" aria-live="polite">
-      <h1 class="title">Выбор места</h1>
-      <p class="subtitle">Сначала выберите помещение, затем рабочее место.</p>
-      <div id="content" class="content"></div>
+    <script type="module" src="app.js" defer></script>
+</head>
+<body>
+    <div class="background-aurora">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar hidden" id="navBar">
+        <button class="nav-btn active" data-target="roomsView">Помещения</button>
+        <button class="nav-btn" data-target="historyView">Мои Брони</button>
+    </nav>
+
+    <main id="appContainer">
+        <!-- Loader / Auth -->
+        <section id="loadingView" class="view active">
+            <div class="glass-card text-center loader-card">
+                <div class="spinner"></div>
+                <h2 id="loadingText">Авторизация...</h2>
+            </div>
+        </section>
+
+        <!-- Rooms List -->
+        <section id="roomsView" class="view">
+            <h1 class="view-title">Выберите помещение</h1>
+            <div id="roomsList" class="grid-list"></div>
+        </section>
+
+        <!-- Workspaces Selection -->
+        <section id="workspacesView" class="view">
+            <div class="header-with-back">
+                <button class="back-btn" id="backToRooms">←</button>
+                <h1 class="view-title" id="roomTitle">Схема помещения</h1>
+            </div>
+
+            <div class="glass-card filter-card">
+                <label>Выберите время бронирования</label>
+                <div class="time-filters">
+                    <input type="date" id="bookingDate" required>
+                    <input type="time" id="startTime" required>
+                    <span>-</span>
+                    <input type="time" id="endTime" required>
+                </div>
+                <button id="searchWorkspacesBtn" class="btn primary full-width mt-10">Показать места</button>
+            </div>
+
+            <div id="workspacesList" class="grid-list mt-20">
+                <!-- Заполняется JS -->
+            </div>
+        </section>
+
+        <!-- History -->
+        <section id="historyView" class="view">
+            <h1 class="view-title">История бронирований</h1>
+            <div id="historyList" class="list-stack">
+                <!-- Заполняется JS -->
+            </div>
+        </section>
     </main>
-  </body>
+
+    <!-- Modal for booking confirmation -->
+    <div id="bookingModal" class="modal-overlay hidden">
+        <div class="glass-card modal-content">
+            <h2>Подтверждение</h2>
+            <p id="modalText"></p>
+            <div class="modal-actions">
+                <button class="btn secondary" id="modalCancel">Отмена</button>
+                <button class="btn primary" id="modalConfirm">Забронировать</button>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
