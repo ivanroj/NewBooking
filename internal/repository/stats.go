@@ -40,7 +40,7 @@ func (r *Repo) GetStats(dateFrom, dateTo string) (StatsResult, error) {
 	dateFilter := ""
 	args := []any{}
 	if dateFrom != "" && dateTo != "" {
-		dateFilter = " AND b.start_time >= $1 AND b.start_time < $2"
+		dateFilter = " AND b.start_time >= $1 AND b.start_time < ($2::date + interval '1 day')"
 		args = append(args, dateFrom, dateTo)
 	}
 
