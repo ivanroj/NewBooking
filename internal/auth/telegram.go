@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"sort"
 	"strconv"
@@ -17,10 +18,14 @@ import (
 
 var errNoUserPayload = errors.New("init data missing user")
 
-func buildDataCheckString(values url.Values) string {
+func buildDataCheckString(values url.Values, excludeKeys ...string) string {
+	skip := map[string]bool{"hash": true}
+	for _, k := range excludeKeys {
+		skip[k] = true
+	}
 	keys := make([]string, 0, len(values))
 	for k := range values {
-		if k == "hash" || k == "signature" {
+		if skip[k] {
 			continue
 		}
 		keys = append(keys, k)
@@ -81,12 +86,33 @@ func ValidateTelegramInitData(initDataRaw, botToken string, maxAge time.Duration
 		}
 	}
 
+	// For bot-token HMAC validation, only "hash" is excluded from data_check_string.
+	// "signature" (if present) must be INCLUDED — it is only excluded for Ed25519 public-key validation.
 	dataCheck := buildDataCheckString(values)
+	log.Printf("[auth-debug] data_check_string keys: %v", func() []string {
+		ks := make([]string, 0)
+		for k := range values {
+			if k != "hash" {
+				ks = append(ks, k)
+			}
+		}
+		sort.Strings(ks)
+		return ks
+	}())
+	log.Printf("[auth-debug] wantHash=%s", wantHash[:min(16, len(wantHash))])
+
 	got, err := computeWebAppSignature(botToken, dataCheck)
 	if err != nil {
 		return 0, err
 	}
+	log.Printf("[auth-debug] gotHash=%s", got[:min(16, len(got))])
+
 	if subtle.ConstantTimeCompare([]byte(strings.ToLower(got)), []byte(strings.ToLower(wantHash))) != 1 {
+		// Check if signature-based validation is needed (Bot API 7.x+)
+		sig := values.Get("signature")
+		if sig != "" {
+			log.Printf("[auth-debug] signature field present, length=%d", len(sig))
+		}
 		return 0, fmt.Errorf("%w: hash mismatch", ErrInvalidTelegramInitData)
 	}
 
