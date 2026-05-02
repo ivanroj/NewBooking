@@ -31,7 +31,7 @@ INSERT INTO users (telegram_id, role, email, password_hash)
 VALUES ($1, 'student', NULL, NULL)
 ON CONFLICT (telegram_id)
 DO UPDATE SET role = excluded.role
-RETURNING id, telegram_id, role, email, password_hash`
+RETURNING id, COALESCE(telegram_id,'') AS telegram_id, role, COALESCE(email,'') AS email, COALESCE(password_hash,'') AS password_hash`
 
 	var u models.User
 	if err := r.db.Get(&u, q, tg); err != nil {
