@@ -16,10 +16,11 @@ type WorkspaceAvailability struct {
 }
 
 // CreateWorkspace inserts a new workspace in the given room.
-func (r *Repo) CreateWorkspace(roomID int64, name string) (models.Workspace, error) {
-	const q = `INSERT INTO workspaces (room_id, name) VALUES ($1, $2) RETURNING id, room_id, name`
+func (r *Repo) CreateWorkspace(roomID int64, name string, gridX, gridY int) (models.Workspace, error) {
+	const q = `INSERT INTO workspaces (room_id, name, grid_x, grid_y) VALUES ($1, $2, $3, $4)
+		RETURNING id, room_id, name, grid_x, grid_y`
 	var ws models.Workspace
-	if err := r.db.Get(&ws, q, roomID, name); err != nil {
+	if err := r.db.Get(&ws, q, roomID, name, gridX, gridY); err != nil {
 		return models.Workspace{}, fmt.Errorf("create workspace: %w", err)
 	}
 	return ws, nil
@@ -28,9 +29,9 @@ func (r *Repo) CreateWorkspace(roomID int64, name string) (models.Workspace, err
 // ListWorkspaces returns all workspaces for a room with availability flag for the given slot.
 // If start.IsZero() no availability check is performed (available = true always).
 func (r *Repo) ListWorkspaces(roomID int64, start, end time.Time) ([]WorkspaceAvailability, error) {
-	const qSimple = `SELECT id, room_id, name, TRUE AS available FROM workspaces WHERE room_id = $1 ORDER BY id`
+	const qSimple = `SELECT id, room_id, name, grid_x, grid_y, TRUE AS available FROM workspaces WHERE room_id = $1 ORDER BY id`
 	const qAvail = `
-SELECT w.id, w.room_id, w.name,
+SELECT w.id, w.room_id, w.name, w.grid_x, w.grid_y,
        NOT EXISTS (
            SELECT 1 FROM bookings b
            WHERE b.workspace_id = w.id
@@ -55,13 +56,13 @@ ORDER BY w.id`
 	return out, nil
 }
 
-// UpdateWorkspace renames a workspace.
-func (r *Repo) UpdateWorkspace(roomID, wsID int64, name string) (models.Workspace, error) {
+// UpdateWorkspace updates workspace name and coordinates.
+func (r *Repo) UpdateWorkspace(roomID, wsID int64, name string, gridX, gridY int) (models.Workspace, error) {
 	const q = `
-UPDATE workspaces SET name = $1 WHERE id = $2 AND room_id = $3
-RETURNING id, room_id, name`
+UPDATE workspaces SET name = $1, grid_x = $4, grid_y = $5 WHERE id = $2 AND room_id = $3
+RETURNING id, room_id, name, grid_x, grid_y`
 	var ws models.Workspace
-	switch err := r.db.Get(&ws, q, name, wsID, roomID); {
+	switch err := r.db.Get(&ws, q, name, wsID, roomID, gridX, gridY); {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.Workspace{}, ErrNotFound
 	case err != nil:

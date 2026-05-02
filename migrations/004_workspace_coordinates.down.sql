@@ -1,0 +1,3 @@
+ALTER TABLE workspaces
+    DROP COLUMN IF EXISTS grid_x,
+    DROP COLUMN IF EXISTS grid_y;

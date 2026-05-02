@@ -10,6 +10,8 @@ type Workspace struct {
 	ID     int64  `db:"id" json:"id"`
 	RoomID int64  `db:"room_id" json:"room_id"`
 	Name   string `db:"name" json:"name"`
+	GridX  int    `db:"grid_x" json:"grid_x"`
+	GridY  int    `db:"grid_y" json:"grid_y"`
 }
 
 type User struct {

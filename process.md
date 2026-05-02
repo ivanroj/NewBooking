@@ -8,9 +8,46 @@
 | 2 — Авторизация и роли | ✅ Закрыт |
 | 3 — Помещения и Бронирование | ✅ Закрыт |
 | 4 — Frontend: Клиент (Студент) | ✅ Закрыт (ожидает проверки) |
-| 5 — Frontend: Админ и Схемы | ⏳ Ожидает |
+| 5 — Frontend: Админ и Схемы | ✅ Закрыт |
 | 6 — Уведомления и Фоновые задачи | ⏳ Ожидает |
-| 7 — Деплой | ⏳ Ожидает |
+| 7 — Деплой | ✅ Закрыт |
+
+## Этап 7 — выполнен (2026-05-02)
+Локальное развёртывание через Docker Compose:
+- **frontend/Dockerfile**: Nginx 1.27-alpine с раздачей статики
+- **frontend/nginx.conf**: проксирование `/api/` → backend, раздача HTML/JS/CSS
+- **docker-compose.yml**: добавлен сервис `frontend` (порт 3000), volume для pgdata
+- **README.md**: секция «Быстрый запуск» с полными инструкциями
+
+### Команды для развёртывания:
+```bash
+docker compose up --build
+# Фронтенд: http://localhost:3000
+# API: http://localhost:8080
+# Админка: http://localhost:3000/admin.html
+```
+
+---
+
+## Этап 5 — выполнен (2026-05-02)
+Админ-панель расширена полным функционалом:
+- **Миграция 004**: добавлены координаты grid_x, grid_y к workspaces
+- **Backend**: GET /api/admin/bookings (список с JOIN, фильтры, пагинация), GET /api/admin/stats (аналитика: загрузка по помещениям, топ-5 мест, распределение по дням)
+- **Canvas-редактор**: интерактивный план помещения с drag & drop для перемещения рабочих мест, клик для добавления, двойной клик для редактирования, правый клик для удаления
+- **Бронирования**: таблица с JOIN-данными (workspace_name, room_name), фильтр по статусу, пагинация
+- **Статистика (UC-8)**: bar-charts загрузки по помещениям, топ-5 популярных мест, распределение по дням недели, фильтр по периоду
+- **Тесты**: Go unit-тесты handler (AdminUpdateBooking, AdminListBookings, AdminGetStats), Jest тесты (calculateStats, computeOccupancyPercent, dayName, formatDateRange, aggregateByRoom, AdminAPI)
+- **Линтинг**: golangci-lint и ESLint — 0 ошибок
+
+### Команды для проверки:
+```bash
+go test ./...
+cd frontend && npm run test
+golangci-lint run ./...
+cd frontend && npm run lint
+```
+
+---
 
 ## Этап 4 — выполнен (2026-05-02)
 Весь код Фронтенда Студента написан (Vanilla HTML/JS/CSS):

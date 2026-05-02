@@ -10,11 +10,15 @@ import (
 )
 
 type createWSReq struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	GridX int    `json:"grid_x"`
+	GridY int    `json:"grid_y"`
 }
 
 type updateWSReq struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	GridX int    `json:"grid_x"`
+	GridY int    `json:"grid_y"`
 }
 
 // AdminCreateWorkspace POST /api/rooms/{room_id}/workspaces — admin only.
@@ -38,7 +42,7 @@ func (h *Handlers) AdminCreateWorkspace(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	ws, err := h.Repo.CreateWorkspace(roomID, req.Name)
+	ws, err := h.Repo.CreateWorkspace(roomID, req.Name, req.GridX, req.GridY)
 	if err != nil {
 		_ = writeJSON(w, http.StatusInternalServerError, errResp{Error: "database_error"})
 		return
@@ -94,7 +98,7 @@ func (h *Handlers) AdminUpdateWorkspace(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	ws, err := h.Repo.UpdateWorkspace(roomID, wsID, req.Name)
+	ws, err := h.Repo.UpdateWorkspace(roomID, wsID, req.Name, req.GridX, req.GridY)
 	if errors.Is(err, repository.ErrNotFound) {
 		_ = writeJSON(w, http.StatusNotFound, errResp{Error: "not_found"})
 		return

@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import { jest } from '@jest/globals';
 import { API, switchView } from '../app.js';
 
 describe('Frontend App Logic', () => {

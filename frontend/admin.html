@@ -66,14 +66,12 @@
                                 <th>Действия</th>
                             </tr>
                         </thead>
-                        <tbody id="roomsTableBody">
-                            <!-- JS fill -->
-                        </tbody>
+                        <tbody id="roomsTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Schema Tab -->
+            <!-- Schema Tab (Canvas Editor) -->
             <div id="schemaTab" class="tab-content hidden">
                 <h2>Редактор схем</h2>
                 <div class="form-group mt-10">
@@ -82,10 +80,11 @@
                 </div>
                 <div class="schema-editor mt-20">
                     <div class="schema-toolbar">
-                        <button class="btn primary" id="openAddWorkspaceBtn" disabled>Добавить рабочее место</button>
+                        <button class="btn primary" id="addWorkspaceCanvasBtn" disabled>Добавить место (клик на план)</button>
+                        <span id="canvasHint" class="hint-text hidden">Кликните на свободное место на плане</span>
                     </div>
-                    <div id="schemaContainer" class="schema-grid mt-20">
-                        <!-- Workspaces will be rendered here -->
+                    <div class="canvas-wrapper mt-10">
+                        <canvas id="schemaCanvas" width="800" height="500"></canvas>
                     </div>
                 </div>
             </div>
@@ -93,28 +92,51 @@
             <!-- Bookings Tab -->
             <div id="bookingsTab" class="tab-content hidden">
                 <h2>Все бронирования</h2>
+                <div class="bookings-filters mt-10">
+                    <div class="form-group">
+                        <label for="bookingsStatusFilter">Статус:</label>
+                        <select id="bookingsStatusFilter" class="form-select">
+                            <option value="">Все</option>
+                            <option value="active">Активные</option>
+                            <option value="canceled">Отменённые</option>
+                            <option value="completed">Завершённые</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="table-responsive mt-20">
                     <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Место (Комната)</th>
-                                <th>Пользователь (ID)</th>
+                                <th>Место</th>
+                                <th>Помещение</th>
+                                <th>Пользователь</th>
                                 <th>Время</th>
                                 <th>Статус</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
-                        <tbody id="bookingsTableBody">
-                            <!-- JS fill -->
-                        </tbody>
+                        <tbody id="bookingsTableBody"></tbody>
                     </table>
                 </div>
+                <div class="pagination mt-20" id="bookingsPagination"></div>
             </div>
 
             <!-- Stats Tab -->
             <div id="statsTab" class="tab-content hidden">
                 <h2>Статистика и Отчеты</h2>
+                <div class="stats-date-range mt-10">
+                    <div class="form-group">
+                        <label for="statsFrom">С:</label>
+                        <input type="date" id="statsFrom">
+                    </div>
+                    <div class="form-group">
+                        <label for="statsTo">По:</label>
+                        <input type="date" id="statsTo">
+                    </div>
+                    <button class="btn primary" id="applyStatsFilter">Применить</button>
+                </div>
+
                 <div class="stats-grid mt-20">
                     <div class="stat-card glass-card">
                         <h3>Всего бронирований</h3>
@@ -123,6 +145,21 @@
                     <div class="stat-card glass-card">
                         <h3>Активных бронирований</h3>
                         <p id="statActiveBookings" class="stat-value">0</p>
+                    </div>
+                </div>
+
+                <div class="stats-charts mt-20">
+                    <div class="chart-section glass-card">
+                        <h3>Загрузка по помещениям</h3>
+                        <div id="roomLoadChart" class="bar-chart mt-10"></div>
+                    </div>
+                    <div class="chart-section glass-card">
+                        <h3>Топ-5 популярных мест</h3>
+                        <div id="topWorkspacesChart" class="bar-chart mt-10"></div>
+                    </div>
+                    <div class="chart-section glass-card">
+                        <h3>Распределение по дням недели</h3>
+                        <div id="dayDistChart" class="bar-chart mt-10"></div>
                     </div>
                 </div>
             </div>
@@ -150,14 +187,16 @@
             </form>
         </div>
     </div>
-    
+
     <div id="workspaceModal" class="modal-overlay hidden">
         <div class="glass-card modal-content">
             <h2 id="workspaceModalTitle">Добавить место</h2>
             <form id="workspaceForm">
                 <input type="hidden" id="workspaceId">
+                <input type="hidden" id="workspaceGridX">
+                <input type="hidden" id="workspaceGridY">
                 <div class="form-group mt-10">
-                    <label>Название/Номер места</label>
+                    <label>Название / Номер места</label>
                     <input type="text" id="workspaceName" required>
                 </div>
                 <div class="modal-actions">
