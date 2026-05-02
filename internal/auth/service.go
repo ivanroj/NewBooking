@@ -28,6 +28,11 @@ func NewService(repo *repository.Repo, jwtSecret []byte, jwtTTL time.Duration, b
 	}
 }
 
+// BotTokenForDebug returns the bot token for logging (temporary debug helper).
+func (s *Service) BotTokenForDebug() string {
+	return s.botTok
+}
+
 func (s *Service) AdminLogin(email, password string) (string, error) {
 	if strings.TrimSpace(email) == "" || password == "" {
 		return "", ErrUnauthorized
