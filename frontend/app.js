@@ -75,15 +75,25 @@ async function initApp() {
     setupEventListeners();
 
     try {
-        // Try to auth via Telegram WebApp data
+        // In Telegram context, always re-auth via initData (ignore stale localStorage token)
         if (tg && tg.initData) {
-            const { access_token } = await api.request('/auth/student/telegram', {
+            console.log('[auth] Telegram initData present, length=' + tg.initData.length);
+            const resp = await api.request('/auth/student/telegram', {
                 method: 'POST',
                 body: JSON.stringify({ init_data: tg.initData })
             });
-            api.setToken(access_token);
+            if (!resp.access_token) {
+                throw { error: 'no_token_in_response', message: 'Сервер не вернул токен' };
+            }
+            api.setToken(resp.access_token);
+        } else if (tg) {
+            // Telegram context but no initData
+            console.warn('[auth] Telegram context but initData is empty');
+            document.getElementById('loadingText').textContent = "Telegram не передал данные авторизации. Попробуйте закрыть и открыть приложение заново.";
+            document.querySelector('.spinner').style.display = 'none';
+            return;
         } else if (!api.token) {
-            // No token, no Telegram environment
+            // No Telegram, no saved token
             document.getElementById('loadingText').textContent = "Пожалуйста, откройте приложение через Telegram.";
             document.querySelector('.spinner').style.display = 'none';
             return;
@@ -94,9 +104,11 @@ async function initApp() {
         switchView('rooms');
         navBar.classList.remove('hidden');
     } catch (err) {
+        console.error('[auth] error:', err);
         document.getElementById('loadingText').textContent = "Ошибка авторизации.";
         document.querySelector('.spinner').style.display = 'none';
-        if (tg) tg.showAlert("Не удалось авторизоваться: " + (err.error || err.message));
+        const errMsg = err.error || err.message || JSON.stringify(err);
+        if (tg) tg.showAlert("Не удалось авторизоваться: " + errMsg);
     }
 }
 
